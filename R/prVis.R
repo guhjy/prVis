@@ -133,6 +133,7 @@ prVis <- function(xy,labels=FALSE,yColumn = ncol (xy), deg=2,
     }
   }
   if (saveOutputs != ""){
+    colnames(polyMat)[1:ncol(xy)] <- colnames(xy)
     outputList <- list(gpOut=polyMat,prout=x.pca)
     save(outputList,file=saveOutputs)
   }
@@ -164,7 +165,7 @@ addRowNums <- function(np=0,area=c(0,1,0,1),savedPrVisOut="lastPrVisOut")
     row.names(outputList$prout$x) <-
       as.character(1:nrow(outputList$prout$x))
 
-  if(area != c(0,1,0,1){
+  if(area != c(0,1,0,1)){
     # get boundaries of graph
     xMin <- min(outputList$prout$x[,1])
     xMax <- max(outputList$prout$x[,1])
@@ -204,6 +205,29 @@ addRowNums <- function(np=0,area=c(0,1,0,1),savedPrVisOut="lastPrVisOut")
     coords <- pcax[rn,]
     text(coords[1],coords[2],rn)
   }
+}
+
+# used to color datapoints by the value of a continuous variable.
+# Datapoints will be blue at low values, and red at higher values, with
+# a gradient inbetween.
+# arguments:
+#   n: the number of different colors to be used 
+#   colName: the name of the column containing the continuous variable the user
+#            wants to color by
+#   savedPrVisOut: the filename where the output of a prVis call has been saved
+continColors <- function(colNum,n=256,savedPrVisOut="lastPrVisOut") {
+  load(savedPrVisOut)
+  d <- outputList$gpOut
+  #if (!colName %in% colnames(d)) {
+  #  stop('please enter a valid column name')
+  }
+  d <- d[,colNum]
+  minVal <- min(d)
+  maxVal <- max(d)
+  diffVal <- maxVal - minVal
+  colorPalette <- rev(rainbow(n,start=0,end=0.7))
+  colorIndexes <- sapply(d, function(x) ((x - minVal) * n) %/% diffVal)
+  plot(outputList$prout$x[,1:2], col=colorPalette[colorIndexes])
 }
 
 # intended to produce different grouping methods based on user input;
